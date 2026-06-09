@@ -13,10 +13,6 @@ warnings.filterwarnings('ignore')
 # ==========================================
 st.set_page_config(page_title="YBS E-Ticaret Master Dashboard", layout="wide")
 
-st.sidebar.title("YBS Kontrol Paneli")
-st.sidebar.markdown("**Geliştirici:** Yasin Keleş\n\n**Bölüm:** Yönetim Bilişim Sistemleri (BŞEÜ)")
-st.sidebar.divider()
-
 st.title("TÜRKİYE E-TİCARET EKOSİSTEMİ MASTER PANELİ")
 st.markdown("Hata toleranslı (Fault-Tolerant), tam donanımlı Karar Destek Sistemi.")
 st.divider()
@@ -38,12 +34,13 @@ def guvenli_veri_oku(uploaded_file):
         return None
 
 # ==========================================
-# 3. DOSYA YÜKLEME VE BİRLEŞTİRME
+# 3. DOSYA YÜKLEME VE BİRLEŞTİRME (SOL MENÜ EN ÜSTTE)
 # ==========================================
 st.sidebar.subheader("Veri Kaynaklarını Yükleyin")
 file_fert = st.sidebar.file_uploader("1. TÜİK FERT Verisi (.csv)", type=['csv'])
 file_hane = st.sidebar.file_uploader("2. TÜİK HANE Verisi (.csv)", type=['csv'])
 file_temiz = st.sidebar.file_uploader("3. TEMİZLENMİŞ Veri (.csv)", type=['csv'])
+st.sidebar.divider()
 
 df_fert = guvenli_veri_oku(file_fert) if file_fert else None
 df_hane = guvenli_veri_oku(file_hane) if file_hane else None
@@ -127,7 +124,7 @@ if is_data_loaded:
     ]
     
     analiz = st.sidebar.selectbox("Grafik Seçiniz (Tamamı Çalışır):", secenekler)
-    st.divider()
+    st.sidebar.divider()
 
     # ---------------------------------------------------------
     # GRAFİKLER 1-26
@@ -186,7 +183,6 @@ if is_data_loaded:
             st.warning("Gerçek sütun bulunamadı. Simülasyon modeli gösteriliyor.")
             ciz_bar(['0 Cihaz', '1 Cihaz', '2 Cihaz', '3+ Cihaz'], [5.2, 35.1, 62.4, 88.5], "Cihaz Sayısına Göre", colors=['#bdc3c7', '#95a5a6', '#7f8c8d', '#2c3e50'])
 
-    # GÜNCELLENMİŞ 5. GRAFİK (BÖLGELER - YEŞİL YATAY)
     elif analiz == secenekler[5]:
         st.subheader(analiz.upper())
         df = get_df('IBBS_1')
@@ -311,7 +307,6 @@ if is_data_loaded:
         st.warning("Skor modellemesi algoritması çalıştırıldı (Simülasyon).")
         ciz_bar(['Düşük Skor (0-2)', 'Orta Skor (3-5)', 'Yüksek Skor (6-8)'], [18.5, 54.2, 92.4], "Dijital Yetkinlik Skoru Etkisi", colors=['#e74c3c', '#f39c12', '#2ecc71'])
 
-    # GÜNCELLENMİŞ EĞİTİM ALGORİTMASI (14. GRAFİK)
     elif analiz == secenekler[14]:
         st.subheader(analiz.upper())
         df = get_df('OKUL_BITEN')
@@ -319,8 +314,6 @@ if is_data_loaded:
             df_e = df.dropna(subset=['OKUL_BITEN']).copy()
             df_e['Eğitim'] = df_e['OKUL_BITEN'].apply(get_edu)
             oranlar = df_e.groupby('Eğitim')['E_TICARET_YAPTI_MI'].mean() * 100
-            
-            # Dinamik olarak sadece verisi olan grupları çizer (%0 hatasını ortadan kaldırır)
             ciz_bar(oranlar.index.astype(str).tolist(), oranlar.values.tolist(), "Eğitim Seviyesi", colors=['#95a5a6', '#f39c12', '#2ecc71'][:len(oranlar)])
         else:
             st.warning("Eğitim sütunu bulunamadı. Simülasyon gösteriliyor.")
@@ -394,7 +387,6 @@ if is_data_loaded:
             ax.barh(['Teslimat Gecikmesi', 'Yanlış/Hasarlı Ürün', 'Dolandırıcılık', 'Yüksek Maliyet'], [35, 22, 18, 45], color='#e74c3c', edgecolor='black')
             st.pyplot(fig); plt.close()
 
-    # GÜNCELLENMİŞ 22. GRAFİK (DUMBBELL LEJANTLI)
     elif analiz == secenekler[22]:
         st.subheader(analiz.upper())
         df = get_df('YAS')
@@ -409,7 +401,6 @@ if is_data_loaded:
             for i, (idx, row) in enumerate(pivot.dropna().iterrows()):
                 ax.plot([row['Yok'], row['Var']], [idx, idx], color='grey', zorder=1)
                 
-                # Lejant İçin Renk Kodlaması
                 ax.scatter(row['Yok'], idx, color='red', s=150, zorder=2, label='Kırmızı (Bilgisayarı Olmayanlar)' if i==0 else "")
                 ax.scatter(row['Var'], idx, color='blue', s=150, zorder=2, label='Mavi (Bilgisayarı Olanlar)' if i==0 else "")
                 
@@ -444,7 +435,6 @@ if is_data_loaded:
             st.warning("Yurt dışı pazar sütunu bulunamadı. Simülasyon gösteriliyor.")
             ciz_bar(['Sadece Yurt İçi', 'Avrupa Birliği (AB)', 'Diğer Ülkeler'], [92.1, 4.5, 12.8], "Sınır Ötesi (Simülasyon)", colors=['#27ae60', '#f1c40f', '#8e44ad'])
 
-    # GÜNCELLENMİŞ EĞİTİM ALGORİTMASI (25. GRAFİK ISI HARİTASI)
     elif analiz == secenekler[25]:
         st.subheader(analiz.upper())
         df = get_df('OKUL_BITEN')
@@ -454,7 +444,6 @@ if is_data_loaded:
             df_h['Egitim'] = df_h['OKUL_BITEN'].apply(get_edu)
             df_h['Cihaz'] = np.where(df_h[pc_col]==1, 'PC Sahibi', 'Sadece Mobil')
             
-            # Dinamik olarak sadece var olan grupları al (Lise hatasını önler)
             pivot = pd.pivot_table(df_h, values='E_TICARET_YAPTI_MI', index='Cihaz', columns='Egitim', aggfunc='mean') * 100
             fig, ax = plt.subplots(figsize=(9, 4))
             sns.heatmap(pivot, annot=True, fmt=".1f", cmap="YlGnBu", linewidths=1, linecolor='black', ax=ax)
